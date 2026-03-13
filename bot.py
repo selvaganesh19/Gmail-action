@@ -19,12 +19,14 @@ response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com",
+        "X-Title": "Email Summary Bot"
     },
     json={
-        "model": "z-ai/glm-4.5-air:free",
+        "model": "deepseek/deepseek-chat-v3-0324:free",
         "messages": [
-            {"role": "system", "content": "Summarize emails briefly."},
+            {"role": "system", "content": "Summarize emails in 1–2 lines each."},
             {"role": "user", "content": prompt}
         ]
     }
@@ -32,13 +34,19 @@ response = requests.post(
 
 data = response.json()
 
-summary = data.get("choices", [{}])[0].get("message", {}).get("content", "⚠️ AI summarization failed.")
+print("OPENROUTER RESPONSE:", data)
+
+summary = "⚠️ AI summarization failed."
+
+if "choices" in data:
+    summary = data["choices"][0]["message"]["content"]
 
 message = f"📬 Email Summary\n\n{summary}"
 
-telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-
-requests.post(telegram_url, json={
-    "chat_id": CHAT_ID,
-    "text": message
-})
+requests.post(
+    f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+    json={
+        "chat_id": CHAT_ID,
+        "text": message
+    }
+)
