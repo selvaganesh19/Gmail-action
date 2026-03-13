@@ -14,7 +14,6 @@ creds = Credentials.from_authorized_user_info(gmail_token)
 
 service = build("gmail", "v1", credentials=creds)
 
-# Fetch only NEW unread emails (last hour)
 results = service.users().messages().list(
     userId="me",
     q="is:unread newer_than:1h",
@@ -30,11 +29,11 @@ for msg in messages:
 
     headers = m["payload"]["headers"]
 
-    subject = next((h["value"] for h in headers if h["name"] == "Subject"), "")
-    sender = next((h["value"] for h in headers if h["name"] == "From"), "")
-    date = next((h["value"] for h in headers if h["name"] == "Date"), "")
+    subject = next((h["value"] for h in headers if h["name"]=="Subject"), "")
+    sender = next((h["value"] for h in headers if h["name"]=="From"), "")
+    date = next((h["value"] for h in headers if h["name"]=="Date"), "")
 
-    snippet = m.get("snippet", "")
+    snippet = m.get("snippet","")
 
     emails.append({
         "sender": sender,
@@ -44,21 +43,22 @@ for msg in messages:
     })
 
 if not emails:
-    message = "📭 No new unread emails in the last hour."
+    message = "📬 No new unread emails in the last hour."
 else:
 
     prompt = """
-Summarize the following emails.
+Summarize each email briefly.
 
-Return the result in this format exactly:
+Return output in this EXACT format with emojis:
 
-📧 Email Name - <name>
-📝 Summary - <one sentence summary>
+📧 Email Name - <sender or company name>
+📝 Summary - <one short sentence summary>
 
 Rules:
-- Keep summaries short and clear
-- Remove marketing noise and signatures
-- Use sender or subject as the email name
+- Maximum 1 short sentence
+- Remove marketing fluff
+- Keep it clear and user friendly
+- Separate each email with a blank line
 """
 
     for e in emails:
@@ -72,22 +72,18 @@ Rules:
         },
         json={
             "model": "z-ai/glm-4.5-air:free",
-            "messages": [
-                {"role": "system", "content": "You summarize emails clearly."},
-                {"role": "user", "content": prompt}
+            "messages":[
+                {"role":"system","content":"You summarize emails clearly."},
+                {"role":"user","content":prompt}
             ]
         }
     )
 
     summary = response.json()["choices"][0]["message"]["content"]
 
-    message = f"📬 *New Gmail Emails (Last Hour)*\n\n{summary}"
+    message = f"📬 New Gmail Emails (Last Hour)\n\n{summary}"
 
 requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-    json={
-        "chat_id": CHAT_ID,
-        "text": message,
-        "parse_mode": "Markdown"
-    }
+    json={"chat_id":CHAT_ID,"text":message}
 )
