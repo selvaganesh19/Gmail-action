@@ -19,9 +19,7 @@ response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com",
-        "X-Title": "Email Summary Bot"
+        "Content-Type": "application/json"
     },
     json={
         "model": "z-ai/glm-4.5-air:free",
@@ -34,12 +32,7 @@ response = requests.post(
 
 data = response.json()
 
-print("API RESPONSE:", data)  # helps debugging in GitHub Actions logs
-
-summary = "⚠️ AI summarization failed."
-
-if "choices" in data:
-    summary = data["choices"][0]["message"]["content"]
+summary = data.get("choices", [{}])[0].get("message", {}).get("content", "⚠️ AI summarization failed.")
 
 message = f"📬 Email Summary\n\n{summary}"
 
