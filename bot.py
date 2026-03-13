@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY").strip()
 
 gmail_env = os.getenv("GMAIL_TOKEN")
 
