@@ -10,23 +10,29 @@ emails = [
     {"sender": "GitHub", "subject": "Security alert", "body": "A vulnerability was detected"}
 ]
 
-prompt = "Summarize these emails clearly:\n"
+prompt = "Summarize these emails clearly:\n\n"
 
 for e in emails:
     prompt += f"{e['sender']} - {e['subject']} - {e['body']}\n"
 
-
-# OpenRouter request
+# OpenRouter API request
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
     },
     json={
-        "model": "deepseek/deepseek-chat",
+        "model": "z-ai/glm-4.5-air:free",
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "system",
+                "content": "You summarize emails into short readable summaries."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
         ]
     }
 )
@@ -36,9 +42,9 @@ summary = response.json()["choices"][0]["message"]["content"]
 message = f"📬 Email Summary:\n\n{summary}"
 
 # Send to Telegram
-url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
-requests.post(url, json={
+requests.post(telegram_url, json={
     "chat_id": CHAT_ID,
     "text": message
 })
