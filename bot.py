@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
@@ -15,31 +16,37 @@ prompt = "Summarize these emails clearly:\n\n"
 for e in emails:
     prompt += f"{e['sender']} - {e['subject']} - {e['body']}\n"
 
-response = requests.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com",
-        "X-Title": "Email Summary Bot"
-    },
-    json={
-        "model": "deepseek/deepseek-chat-v3-0324:free",
-        "messages": [
-            {"role": "system", "content": "Summarize emails in 1–2 lines each."},
-            {"role": "user", "content": prompt}
-        ]
-    }
-)
+try:
+    response = requests.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com",
+            "X-Title": "Email Summary Bot"
+        },
+        json={
+            "model": "deepseek/deepseek-chat-v3-0324:free",
+            "messages": [
+                {"role": "system", "content": "Summarize emails in 1–2 lines each."},
+                {"role": "user", "content": prompt}
+            ]
+        },
+        timeout=30
+    )
 
-data = response.json()
+    data = response.json()
+    print("OPENROUTER RESPONSE:", json.dumps(data, indent=2))
 
-print("OPENROUTER RESPONSE:", data)
+    if "choices" in data:
+        summary = data["choices"][0]["message"]["content"]
+    elif "error" in data:
+        summary = f"AI Error: {data['error']['message']}"
+    else:
+        summary = "⚠️ AI summarization failed."
 
-summary = "⚠️ AI summarization failed."
-
-if "choices" in data:
-    summary = data["choices"][0]["message"]["content"]
+except Exception as e:
+    summary = f"AI request failed: {str(e)}"
 
 message = f"📬 Email Summary\n\n{summary}"
 
