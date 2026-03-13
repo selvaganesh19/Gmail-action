@@ -14,6 +14,7 @@ creds = Credentials.from_authorized_user_info(gmail_token)
 
 service = build("gmail", "v1", credentials=creds)
 
+# Only fetch NEW unread emails from the last hour
 results = service.users().messages().list(
     userId="me",
     q="is:unread newer_than:1h",
@@ -29,11 +30,11 @@ for msg in messages:
 
     headers = m["payload"]["headers"]
 
-    subject = next((h["value"] for h in headers if h["name"]=="Subject"), "")
-    sender = next((h["value"] for h in headers if h["name"]=="From"), "")
-    date = next((h["value"] for h in headers if h["name"]=="Date"), "")
+    subject = next((h["value"] for h in headers if h["name"] == "Subject"), "")
+    sender = next((h["value"] for h in headers if h["name"] == "From"), "")
+    date = next((h["value"] for h in headers if h["name"] == "Date"), "")
 
-    snippet = m.get("snippet","")
+    snippet = m.get("snippet", "")
 
     emails.append({
         "sender": sender,
@@ -42,6 +43,7 @@ for msg in messages:
         "body": snippet
     })
 
+# If no new emails
 if not emails:
     message = "📬 No new unread emails in the last hour."
 else:
@@ -56,34 +58,46 @@ Return output in this EXACT format with emojis:
 
 Rules:
 - Maximum 1 short sentence
-- Remove marketing fluff
-- Keep it clear and user friendly
+- Remove marketing fluff and signatures
+- Keep it clean and readable
 - Separate each email with a blank line
 """
 
     for e in emails:
         prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nContent: {e['body']}\n"
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "z-ai/glm-4.5-air:free",
-            "messages":[
-                {"role":"system","content":"You summarize emails clearly."},
-                {"role":"user","content":prompt}
-            ]
-        }
-    )
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "z-ai/glm-4.5-air:free",
+                "messages": [
+                    {"role": "system", "content": "You summarize emails clearly and concisely."},
+                    {"role": "user", "content": prompt}
+                ]
+            }
+        )
 
-    summary = response.json()["choices"][0]["message"]["content"]
+        data = response.json()
+
+        if "choices" in data:
+            summary = data["choices"][0]["message"]["content"]
+        else:
+            summary = "⚠️ AI summarization failed. Please check API response."
+
+    except Exception as e:
+        summary = f"⚠️ AI request error: {str(e)}"
 
     message = f"📬 New Gmail Emails (Last Hour)\n\n{summary}"
 
 requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-    json={"chat_id":CHAT_ID,"text":message}
+    json={
+        "chat_id": CHAT_ID,
+        "text": message
+    }
 )
