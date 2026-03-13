@@ -15,33 +15,34 @@ prompt = "Summarize these emails clearly:\n\n"
 for e in emails:
     prompt += f"{e['sender']} - {e['subject']} - {e['body']}\n"
 
-# OpenRouter API request
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
     headers={
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://github.com",  
+        "X-Title": "Email Summary Bot"
     },
     json={
         "model": "z-ai/glm-4.5-air:free",
         "messages": [
-            {
-                "role": "system",
-                "content": "You summarize emails into short readable summaries."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "system", "content": "You summarize emails into short summaries."},
+            {"role": "user", "content": prompt}
         ]
     }
 )
 
-summary = response.json()["choices"][0]["message"]["content"]
+data = response.json()
+
+# Debug print if API fails
+if "choices" not in data:
+    print("OpenRouter Error:", data)
+    summary = "⚠️ AI summarization failed."
+else:
+    summary = data["choices"][0]["message"]["content"]
 
 message = f"📬 Email Summary:\n\n{summary}"
 
-# Send to Telegram
 telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
 requests.post(telegram_url, json={
