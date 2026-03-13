@@ -16,7 +16,7 @@ service = build("gmail", "v1", credentials=creds)
 
 results = service.users().messages().list(
     userId="me",
-    labelIds=["INBOX","UNREAD"],
+    labelIds=["INBOX", "UNREAD"],
     maxResults=10
 ).execute()
 
@@ -29,11 +29,11 @@ for msg in messages:
 
     headers = m["payload"]["headers"]
 
-    subject = next((h["value"] for h in headers if h["name"]=="Subject"), "")
-    sender = next((h["value"] for h in headers if h["name"]=="From"), "")
-    date = next((h["value"] for h in headers if h["name"]=="Date"), "")
+    subject = next((h["value"] for h in headers if h["name"] == "Subject"), "")
+    sender = next((h["value"] for h in headers if h["name"] == "From"), "")
+    date = next((h["value"] for h in headers if h["name"] == "Date"), "")
 
-    snippet = m.get("snippet","")
+    snippet = m.get("snippet", "")
 
     emails.append({
         "sender": sender,
@@ -42,10 +42,33 @@ for msg in messages:
         "body": snippet
     })
 
-prompt = "Summarize these emails with sender and time:\n\n"
+# -------------------------
+# Create AI prompt
+# -------------------------
+
+prompt = """
+You are an email assistant.
+
+Summarize the following emails.
+
+Return output in this EXACT format:
+
+📨 Email: <Sender Name>
+📝 Summary: <1–2 line summary>
+
+Rules:
+- Do not include numbering
+- Do not include timestamps
+- Keep summaries short and clear
+- Remove marketing fluff
+"""
 
 for e in emails:
-    prompt += f"{e['sender']} | {e['subject']} | {e['date']} | {e['body']}\n"
+    prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nContent: {e['body']}\n"
+
+# -------------------------
+# Call OpenRouter
+# -------------------------
 
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -55,18 +78,25 @@ response = requests.post(
     },
     json={
         "model": "z-ai/glm-4.5-air:free",
-        "messages":[
-            {"role":"system","content":"Summarize emails briefly"},
-            {"role":"user","content":prompt}
+        "messages": [
+            {"role": "system", "content": "You summarize emails clearly."},
+            {"role": "user", "content": prompt}
         ]
     }
 )
 
 summary = response.json()["choices"][0]["message"]["content"]
 
+# -------------------------
+# Final Telegram message
+# -------------------------
+
 message = f"📬 Unread Gmail Summary\n\n{summary}"
 
 requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-    json={"chat_id":CHAT_ID,"text":message}
+    json={
+        "chat_id": CHAT_ID,
+        "text": message
+    }
 )
