@@ -26,7 +26,7 @@ try:
             "X-Title": "Email Summary Bot"
         },
         json={
-            "model": "deepseek/deepseek-chat-v3-0324:free",
+            "model": "z-ai/glm-4.5-air:free",
             "messages": [
                 {"role": "system", "content": "Summarize emails in 1–2 lines each."},
                 {"role": "user", "content": prompt}
