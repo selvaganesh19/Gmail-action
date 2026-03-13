@@ -2,7 +2,7 @@ name: Email Summary Bot
 
 on:
   schedule:
-    - cron: "0 * * * *"   # runs every hour
+    - cron: "0 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install google-api-python-client google-auth google-auth-oauthlib requests google-generativeai
+
+      - name: Create credentials.json
+        run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
 
       - name: Run email summarizer
         run: python bot.py
