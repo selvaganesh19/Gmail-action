@@ -8,7 +8,12 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-gmail_token = json.loads(os.getenv("GMAIL_TOKEN"))
+gmail_token_env = os.getenv("GMAIL_TOKEN")
+
+if not gmail_token_env:
+    raise Exception("GMAIL_TOKEN secret not found")
+
+gmail_token = json.loads(gmail_token_env)
 
 creds = Credentials.from_authorized_user_info(gmail_token)
 
