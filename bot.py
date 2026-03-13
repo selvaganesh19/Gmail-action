@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 gmail_token = json.loads(os.getenv("GMAIL_TOKEN"))
 
@@ -45,7 +45,8 @@ for msg in messages:
 
 # If no new emails
 if not emails:
-    message = "📭 No new unread emails in the last hour."
+    message = "📬 No new unread emails in the last hour."
+
 else:
 
     prompt = """
@@ -57,10 +58,9 @@ Return output EXACTLY like this:
 📝 Summary - <one short sentence summary>
 
 Rules:
-- Extract the email id from sender
 - Keep summary to 1 short sentence
 - Remove marketing noise
-- Keep output clean and readable
+- Keep it clean and readable
 """
 
     for e in emails:
@@ -68,18 +68,21 @@ Rules:
 
     try:
         response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
+            "https://api.groq.com/openai/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             },
             json={
-                "model": "z-ai/glm-4.5-air:free",
+                "model": "llama-3.3-70b-versatile",
                 "messages": [
                     {"role": "system", "content": "You summarize emails clearly and concisely."},
                     {"role": "user", "content": prompt}
-                ]
-            }
+                ],
+                "max_tokens": 500,
+                "temperature": 0.3
+            },
+            timeout=20
         )
 
         data = response.json()
