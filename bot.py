@@ -1,56 +1,44 @@
-import { OpenRouter } from "@openrouter/sdk";
-import fetch from "node-fetch";
+import os
+import requests
 
-const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
-const openrouter = new OpenRouter({
-  apiKey: OPENROUTER_API_KEY
-});
+emails = [
+    {"sender": "Amazon", "subject": "Order shipped", "body": "Your package will arrive tomorrow"},
+    {"sender": "GitHub", "subject": "Security alert", "body": "A vulnerability was detected"}
+]
 
-const emails = [
-  { sender: "Amazon", subject: "Order shipped", body: "Your package will arrive tomorrow" },
-  { sender: "GitHub", subject: "Security alert", body: "A vulnerability was detected" }
-];
+prompt = "Summarize these emails clearly:\n\n"
 
-let prompt = "Summarize these emails clearly:\n\n";
+for e in emails:
+    prompt += f"{e['sender']} - {e['subject']} - {e['body']}\n"
 
-for (const e of emails) {
-  prompt += `${e.sender} - ${e.subject} - ${e.body}\n`;
-}
+response = requests.post(
+    "https://openrouter.ai/api/v1/chat/completions",
+    headers={
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    },
+    json={
+        "model": "z-ai/glm-4.5-air:free",
+        "messages": [
+            {"role": "system", "content": "Summarize emails briefly."},
+            {"role": "user", "content": prompt}
+        ]
+    }
+)
 
-try {
+data = response.json()
 
-  const response = await openrouter.chat.send({
-    model: "z-ai/glm-4.5-air:free",
-    messages: [
-      {
-        role: "system",
-        content: "Summarize emails into short readable summaries."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
-    ]
-  });
+summary = data.get("choices", [{}])[0].get("message", {}).get("content", "⚠️ AI summarization failed.")
 
-  const summary = response.choices?.[0]?.message?.content || "⚠️ AI summarization failed.";
+message = f"📬 Email Summary\n\n{summary}"
 
-  const message = `📬 Email Summary\n\n${summary}`;
+telegram_url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
 
-  await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: message
-    })
-  });
-
-  console.log("Message sent to Telegram");
-
-} catch (error) {
-  console.error("OpenRouter error:", error);
-}
+requests.post(telegram_url, json={
+    "chat_id": CHAT_ID,
+    "text": message
+})
