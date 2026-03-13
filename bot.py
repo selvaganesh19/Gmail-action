@@ -1,7 +1,7 @@
 import os
 import requests
 import base64
-from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -10,9 +10,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-creds = service_account.Credentials.from_service_account_file(
-    "credentials.json", scopes=SCOPES
-)
+creds = Credentials.from_authorized_user_file("token.json", SCOPES)
 
 service = build("gmail", "v1", credentials=creds)
 
@@ -31,9 +29,9 @@ for msg in messages:
 
     headers = m["payload"]["headers"]
 
-    subject = next(h["value"] for h in headers if h["name"] == "Subject")
-    sender = next(h["value"] for h in headers if h["name"] == "From")
-    date = next(h["value"] for h in headers if h["name"] == "Date")
+    subject = next((h["value"] for h in headers if h["name"] == "Subject"), "")
+    sender = next((h["value"] for h in headers if h["name"] == "From"), "")
+    date = next((h["value"] for h in headers if h["name"] == "Date"), "")
 
     snippet = m.get("snippet", "")
 
@@ -44,10 +42,10 @@ for msg in messages:
         "body": snippet
     })
 
-prompt = "Summarize these emails clearly with sender and subject:\n\n"
+prompt = "Summarize these emails with sender, subject and time:\n\n"
 
 for e in emails:
-    prompt += f"{e['sender']} | {e['subject']} | {e['body']}\n"
+    prompt += f"{e['sender']} | {e['subject']} | {e['date']} | {e['body']}\n"
 
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -58,17 +56,15 @@ response = requests.post(
     json={
         "model": "z-ai/glm-4.5-air:free",
         "messages": [
-            {"role": "system", "content": "Summarize each email in 1-2 lines."},
+            {"role": "system", "content": "Summarize emails briefly."},
             {"role": "user", "content": prompt}
         ]
     }
 )
 
-data = response.json()
+summary = response.json()["choices"][0]["message"]["content"]
 
-summary = data["choices"][0]["message"]["content"]
-
-message = f"📬 Unread Email Summary\n\n{summary}"
+message = f"📬 Unread Gmail Summary\n\n{summary}"
 
 requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
