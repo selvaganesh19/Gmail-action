@@ -51,16 +51,15 @@ else:
     prompt = """
 Summarize each email briefly.
 
-Return output in this EXACT format with emojis:
+Return output EXACTLY like this:
 
-📧 Email Name - <sender or company name>
+📧 Email Name - <email_id> - <subject>
 📝 Summary - <one short sentence summary>
 
 Rules:
-- Maximum 1 short sentence
-- Remove marketing fluff and signatures
+- Keep summary to 1 short sentence
+- Remove marketing noise
 - Keep it clean and readable
-- Separate each email with a blank line
 """
 
     for e in emails:
@@ -87,7 +86,7 @@ Rules:
         if "choices" in data:
             summary = data["choices"][0]["message"]["content"]
         else:
-            summary = "⚠️ AI summarization failed. Please check API response."
+            summary = "⚠️ AI summarization failed."
 
     except Exception as e:
         summary = f"⚠️ AI request error: {str(e)}"
