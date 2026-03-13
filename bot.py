@@ -14,9 +14,10 @@ creds = Credentials.from_authorized_user_info(gmail_token)
 
 service = build("gmail", "v1", credentials=creds)
 
+# Fetch only NEW unread emails (last hour)
 results = service.users().messages().list(
     userId="me",
-    labelIds=["INBOX", "UNREAD"],
+    q="is:unread newer_than:1h",
     maxResults=10
 ).execute()
 
@@ -42,51 +43,51 @@ for msg in messages:
         "body": snippet
     })
 
-# Build prompt for AI
-prompt = """
+if not emails:
+    message = "📭 No new unread emails in the last hour."
+else:
+
+    prompt = """
 Summarize the following emails.
 
-Return output in this EXACT format:
+Return the result in this format exactly:
 
-Email Name -
-Summary -
+📧 Email Name - <name>
+📝 Summary - <one sentence summary>
 
-Example:
-
-Email Name - Apple
-Summary - Apple announced the new iPad Air powered by the M4 chip.
-
-Keep summaries short (1 sentence).
-Remove marketing noise and signatures.
-Make it clean and readable.
+Rules:
+- Keep summaries short and clear
+- Remove marketing noise and signatures
+- Use sender or subject as the email name
 """
 
-for e in emails:
-    prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nDate: {e['date']}\nContent: {e['body']}\n"
+    for e in emails:
+        prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nContent: {e['body']}\n"
 
-response = requests.post(
-    "https://openrouter.ai/api/v1/chat/completions",
-    headers={
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    },
-    json={
-        "model": "z-ai/glm-4.5-air:free",
-        "messages": [
-            {"role": "system", "content": "You summarize emails clearly."},
-            {"role": "user", "content": prompt}
-        ]
-    }
-)
+    response = requests.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "z-ai/glm-4.5-air:free",
+            "messages": [
+                {"role": "system", "content": "You summarize emails clearly."},
+                {"role": "user", "content": prompt}
+            ]
+        }
+    )
 
-summary = response.json()["choices"][0]["message"]["content"]
+    summary = response.json()["choices"][0]["message"]["content"]
 
-message = f"📬 Unread Gmail Summary\n\n{summary}"
+    message = f"📬 *New Gmail Emails (Last Hour)*\n\n{summary}"
 
 requests.post(
     f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
     json={
         "chat_id": CHAT_ID,
-        "text": message
+        "text": message,
+        "parse_mode": "Markdown"
     }
 )
