@@ -42,33 +42,27 @@ for msg in messages:
         "body": snippet
     })
 
-# -------------------------
-# Create AI prompt
-# -------------------------
-
+# Build prompt for AI
 prompt = """
-You are an email assistant.
-
 Summarize the following emails.
 
 Return output in this EXACT format:
 
-📨 Email: <Sender Name>
-📝 Summary: <1–2 line summary>
+Email Name -
+Summary -
 
-Rules:
-- Do not include numbering
-- Do not include timestamps
-- Keep summaries short and clear
-- Remove marketing fluff
+Example:
+
+Email Name - Apple
+Summary - Apple announced the new iPad Air powered by the M4 chip.
+
+Keep summaries short (1 sentence).
+Remove marketing noise and signatures.
+Make it clean and readable.
 """
 
 for e in emails:
-    prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nContent: {e['body']}\n"
-
-# -------------------------
-# Call OpenRouter
-# -------------------------
+    prompt += f"\nSender: {e['sender']}\nSubject: {e['subject']}\nDate: {e['date']}\nContent: {e['body']}\n"
 
 response = requests.post(
     "https://openrouter.ai/api/v1/chat/completions",
@@ -86,10 +80,6 @@ response = requests.post(
 )
 
 summary = response.json()["choices"][0]["message"]["content"]
-
-# -------------------------
-# Final Telegram message
-# -------------------------
 
 message = f"📬 Unread Gmail Summary\n\n{summary}"
 
