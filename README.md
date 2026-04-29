@@ -140,7 +140,7 @@ sequenceDiagram
 ### Quick Start
 
 ```bash
-git clone https://github.com/youruser/Gmail-action.git
+git clone https://github.com/selvaganesh19/Gmail-action.git
 cd Gmail-action
 pip install -r requirements.txt
 ```
