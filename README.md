@@ -6,8 +6,8 @@ Gmail-action is a Python toolkit for automating Gmail workflows, integrating wit
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Issues](https://img.shields.io/github/issues/youruser/Gmail-action.svg)](https://github.com/youruser/Gmail-action/issues)
-[![Stars](https://img.shields.io/github/stars/youruser/Gmail-action.svg)](https://github.com/youruser/Gmail-action/stargazers)
+[![Issues](https://img.shields.io/github/issues/selvaganesh19/Gmail-action.svg)](https://github.com/youruser/Gmail-action/issues)
+[![Stars](https://img.shields.io/github/stars/selvaganesh19/Gmail-action.svg)](https://github.com/selvaganesh19/Gmail-action/stargazers)
 
 ---
 
