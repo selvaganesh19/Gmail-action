@@ -202,9 +202,6 @@ process_email(callback=custom_handler)
 
 ---
 
-**Contributions, issues, and pull requests are welcome!**
-
-Check the [issues](https://github.com/user/Gmail-action/issues) or [discussions](https://github.com/user/Gmail-action/discussions) for help and roadmap.
 
 ## License
 This project is licensed under the **MIT** License.
