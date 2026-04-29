@@ -2,65 +2,67 @@
 
 **Automate Gmail. Integrate notifications. Supercharge your inbox.**
 
-Gmail-action is a Python toolkit for automating Gmail tasks, integrating with Telegram and Groq for advanced notifications and actions. Streamline email workflows, trigger bots, and connect Gmail to your favorite tools.
+Gmail-action is a Python toolkit for automating Gmail workflows, integrating with Telegram and Groq for real-time alerts and actions. Effortlessly streamline your email tasks, trigger powerful bots, and connect Gmail to your favorite platforms.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Issues](https://img.shields.io/github/issues/user/Gmail-action.svg)](https://github.com/user/Gmail-action/issues)
-[![Last Commit](https://img.shields.io/github/last-commit/user/Gmail-action.svg)](https://github.com/user/Gmail-action/commits)
+[![Issues](https://img.shields.io/github/issues/youruser/Gmail-action.svg)](https://github.com/youruser/Gmail-action/issues)
+[![Stars](https://img.shields.io/github/stars/youruser/Gmail-action.svg)](https://github.com/youruser/Gmail-action/stargazers)
 
 ---
 
-## 📑 Table of Contents
+## 📚 Table of Contents
 
-- [Introduction](#-introduction)
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Workflow](#-workflow)
-- [Tech Stack](#-tech-stack)
-- [Installation](#-installation)
-- [Project Structure](#-project-structure)
-- [Usage](#-usage)
+- [Introduction](#introduction)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Workflow](#workflow)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Usage](#usage)
 
 ---
 
-## 🚀 Introduction
+## 🧐 Introduction
 
-Managing Gmail at scale is challenging: from missing critical messages to connecting with chatbots or triggering workflows, manual processing is slow and error-prone. Gmail-action automates Gmail operations and seamlessly integrates with messaging and AI platforms.
+Managing a busy inbox and integrating Gmail with your favorite messaging and automation tools can be a real challenge. Gmail-action bridges the gap by enabling seamless Gmail automation, real-time notifications to Telegram, and integration with Groq for advanced processing.
 
-**Who benefits?**
-- Developers needing programmable Gmail automation
-- Teams who want Telegram/Groq notifications for incoming mail
-- Power users seeking to connect Gmail with custom bots
+**Who is this for?**
+- Developers building custom email workflows
+- Teams needing real-time alerts and actions on Gmail events
+- Power users who want to connect Gmail with other services effortlessly
 
-| Feature                 | Gmail-action | Zapier Gmail | IFTTT Gmail |
-|-------------------------|:-----------:|:------------:|:-----------:|
-| Open-source             | ✅          | ❌           | ❌          |
-| Python extensibility    | ✅          | ❌           | ❌          |
-| Telegram integration    | ✅          | ❌           | ❌          |
-| Groq (AI) integration   | ✅          | ❌           | ❌          |
-| Unlimited triggers      | ✅          | 🚫           | 🚫          |
-| Free to use             | ✅          | 🚫           | 🚫          |
+**Why Gmail-action?**
+
+| Feature | Gmail-action | Alternative A (Zapier) | Alternative B (IFTTT) |
+|--------------------------|:-----------:|:----------------------:|:---------------------:|
+| Native Gmail API support | ✅ | ✅ | ❌ |
+| Telegram integration | ✅ | ❌ | ✅ |
+| Groq AI actions | ✅ | ❌ | ❌ |
+| Self-hosted | ✅ | ❌ | ❌ |
+| Python extensibility | ✅ | ❌ | ❌ |
+| Open-source | ✅ | ❌ | ❌ |
 
 ---
 
 ## ✨ Features
 
 ### Core Features
-- 📩 Automate Gmail tasks: read, search, and process emails programmatically
-- 🔔 Real-time Telegram notifications for custom Gmail events
-- 🤖 Route emails to Groq for AI-powered processing or chatbots
-- 🏷️ Custom action hooks: define what happens when you get an email
+- 📬 Automate Gmail tasks using the official Gmail API
+- 🤖 Trigger custom bots on new emails or labels
+- 🔔 Send real-time notifications to Telegram
+- 🧠 Integrate with Groq for advanced AI-powered actions
 
 ### Developer Experience
-- 🧩 Simple Python API for quick integration
-- 🛠️ Easy environment configuration with `.env` support
-- 📦 Modular and extensible for custom logic
+- ⚡️ Simple Python interface for rapid prototyping
+- 🛠️ Easily extend workflows with your own scripts
+- 🧩 Modular components for custom pipelines
 
 ### Deployment
-- 🚀 Ready for Docker or any Python environment
-- 📜 MIT-licensed and production-ready
-- ⚡ Minimal dependencies, fast startup
+- 🚀 Ready-to-deploy with environment variable configuration
+- 🐳 Docker-friendly for easy cloud and local deployment
+- 🔒 Secure token management using environment variables
 
 ---
 
@@ -68,25 +70,21 @@ Managing Gmail at scale is challenging: from missing critical messages to connec
 
 ```mermaid
 flowchart LR
-    Client[User/Script]
-    Gmail[Gmail API]
-    Bot[bot.py (Core Logic)]
-    Telegram[Telegram Bot API]
-    Groq[Groq API]
-
-    Client --> Bot
-    Bot <---> Gmail
-    Bot -- Notify --> Telegram
-    Bot -- AI Actions --> Groq
+    A[Gmail API] --> B[Gmail-action Core]
+    B --> C[Telegram Bot]
+    B --> D[Groq Integration]
+    C --> E[Telegram User]
+    D --> F[Groq Service]
 ```
 
-| Component  | Role                                      | Technology             |
-|------------|-------------------------------------------|------------------------|
-| bot.py     | Core orchestration & logic                | Python, google-api     |
-| Gmail API  | Access and manage emails                  | Google API             |
-| Telegram   | Pushes notifications to users             | Telegram Bot API       |
-| Groq       | AI-powered email processing               | Groq API               |
-| .env       | Configures credentials and tokens         | dotenv                 |
+| Component | Role | Technology |
+|---------------------|-----------------------------------------|--------------------|
+| Gmail API | Email data source | Google Gmail API |
+| Gmail-action Core | Workflow engine & event processing | Python |
+| Telegram Bot | Notification delivery | Telegram API |
+| Groq Integration | Advanced AI actions | Groq API |
+| Telegram User | Receives alerts | Telegram |
+| Groq Service | Processes advanced logic | Groq Cloud |
 
 ---
 
@@ -94,55 +92,55 @@ flowchart LR
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant GmailAction
+    actor User
     participant Gmail
+    participant GmailAction
     participant Telegram
     participant Groq
 
-    User->>GmailAction: Start script
-    GmailAction->>Gmail: Fetch new emails
-    Gmail-->>GmailAction: Return email data
-    GmailAction->>Groq: (Optional) Send email for AI processing
-    Groq-->>GmailAction: Return AI results
+    Gmail->>GmailAction: New email event
+    GmailAction->>Groq: (Optional) Analyze/process email
+    Groq-->>GmailAction: AI decision/result
     GmailAction->>Telegram: Send notification
-    Telegram-->>User: Deliver message
+    Telegram-->>User: Receive alert
 ```
 
-**Step-by-step Flow:**
-1. User starts the Gmail-action bot/script.
-2. Script authenticates and fetches emails from Gmail via the Google API.
-3. (Optional) Email content is sent to Groq for AI processing or classification.
-4. Script sends a notification to the configured Telegram chat with details or results.
-5. User receives instant updates or actionable messages via Telegram.
+**Step-by-step process:**
+
+1. Gmail receives a new email, triggering an event.
+2. Gmail-action fetches the email and, if configured, sends it to Groq for AI-based processing.
+3. Groq returns its analysis or action decision.
+4. Gmail-action sends a notification to your Telegram chat with details or results.
+5. The user receives a real-time notification on Telegram.
 
 ---
 
-## 🛠️ Tech Stack
+## 🧰 Tech Stack
 
-| Layer         | Technology                | Purpose                                       |
-|-------------- |--------------------------|-----------------------------------------------|
-| Core Logic    | Python 3.8+              | Main application and orchestration            |
-| Email Access  | Google API (gmail)       | Read/search Gmail, manage emails              |
-| Notifications | Telegram Bot API         | Send chat notifications                       |
-| AI Processing | Groq API                 | AI-powered email understanding/actions        |
-| Config        | dotenv/.env              | Secure environment variable management        |
+| Layer | Technology | Purpose |
+|-------------- |-------------------|-----------------------------------|
+| API Client | Google Gmail API | Email access and management |
+| Bot Layer | Telegram Bot API | Notifications and actions |
+| AI Services | Groq API | Advanced processing/automation |
+| Core Engine | Python (3.8+) | Workflow orchestration |
+| Auth | OAuth 2.0 | Secure authentication |
+| Config | dotenv/env | Secure environment management |
 
 ---
 
-## ⚡ Installation
+## 🚀 Installation
 
 ### Prerequisites
 
-- Python 3.8+
-- Google Cloud project with Gmail API enabled
-- Telegram Bot credentials (token, chat ID)
-- Groq API key (optional for AI features)
+- Python 3.8 or higher
+- Gmail API credentials (OAuth 2.0)
+- Telegram Bot token and chat ID
+- (Optional) Groq API key
 
 ### Quick Start
 
 ```bash
-git clone https://github.com/selvaganesh19/Gmail-action.git
+git clone https://github.com/youruser/Gmail-action.git
 cd Gmail-action
 pip install -r requirements.txt
 ```
@@ -156,51 +154,59 @@ cp .env.example .env
 
 ---
 
-## 📂 Project Structure
+## 🗂️ Project Structure
 
 ```
 Gmail-action/
-├── bot.py               # Main application logic
-├── requirements.txt     # Python dependencies
-├── .env.example         # Example environment file
-├── README.md            # Project documentation
-├── LICENSE              # MIT License
-└── ...
+    bot.py
+    gmail_action/
+        __init__.py
+        gmail_client.py
+        telegram_client.py
+        groq_client.py
+        workflow.py
+    requirements.txt
+    .env.example
+    README.md
 ```
 
 ---
 
-## 🚦 Usage
+## 🛠️ Usage
 
-### Basic Example: Start the Bot
-
-```python
-# Start Gmail-action (ensure .env is configured)
-python bot.py
-```
-
-### Advanced Example: Custom Action on Email
+### Basic Example: Send a Telegram notification on new Gmail
 
 ```python
-from bot import process_email
+from gmail_action import GmailWatcher, TelegramNotifier
 
-def custom_handler(email):
-    if "urgent" in email["subject"].lower():
-        # Trigger custom logic, e.g., send to another service
-        print("Urgent email received:", email["subject"])
+watcher = GmailWatcher()
+notifier = TelegramNotifier(token='YOUR_TELEGRAM_TOKEN', chat_id='YOUR_CHAT_ID')
 
-process_email(callback=custom_handler)
+for email in watcher.listen():
+    notifier.send(
+        f"New email from {email['from']}: {email['subject']}"
+    )
 ```
-<details>
-<summary>What can you do?</summary>
 
-- Receive instant Telegram alerts for important emails
-- Auto-route emails to Groq for summarization, classification, or AI chat
-- Build your own automations by modifying `bot.py` or plugging in custom functions
+### Advanced Example: Trigger Groq AI action and notify
 
-</details>
+```python
+from gmail_action import GmailWatcher, TelegramNotifier, GroqClient
+
+watcher = GmailWatcher()
+notifier = TelegramNotifier(token='YOUR_TELEGRAM_TOKEN', chat_id='YOUR_CHAT_ID')
+groq = GroqClient(api_key='YOUR_GROQ_API_KEY')
+
+for email in watcher.listen():
+    action = groq.analyze_email(email['body'])
+    notifier.send(
+        f"AI Action for email from {email['from']}: {action['result']}"
+    )
+```
 
 ---
+
+**Gmail-action: Automate, notify, and power up your email workflow with Python.**
 
 
 ## License
